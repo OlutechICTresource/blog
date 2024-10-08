@@ -1,0 +1,72 @@
+{% extends 'blog/base.html' %}
+
+{% block content %}
+<h1>{{ post.title }}</h1>
+<p>By {{ post.author }} on {{ post.created_at }}</p>
+<p>{{ post.content }}</p>
+
+<h2>Likes: <span id="like-count">{{ post.likes.count }}</span></h2>
+<button id="like-button">Like</button>
+
+<h2>Star Rating</h2>
+<div>
+    {% for i in "12345" %}
+        <span class="star" data-rating="{{ i }}">⭐</span>
+    {% endfor %}
+</div>
+{% comment %} <p>Average Rating: <span id="average-rating">{{ post.star_ratings.aggregate(Avg('rating'))['rating__avg'] }}</span></p> {% endcomment %}
+<p>Average Rating: {{ avg_rating }}</p>
+
+<h2>Applause: <span id="applause-count">{{ post.applauses.count }}</span></h2>
+<button id="applaud-button">👏 Applaud</button>
+
+<h2>Comments</h2>
+<ul>
+    {% for comment in comments %}
+        <li>{{ comment.author }}: {{ comment.content }} ({{ comment.created_at }})</li>
+    {% endfor %}
+</ul>
+
+<h3>Add a Comment</h3>
+<form method="POST" action="{% url 'create_comment' post.pk %}">
+    {% csrf_token %}
+    {{ comment_form.as_p }}
+    <button type="submit">Submit Comment</button>
+</form>
+
+<script>
+document.getElementById('like-button').onclick = function() {
+    fetch("{% url 'like_post' post.pk %}", { method: 'POST', headers: {'X-CSRFToken': '{{ csrf_token }}'} })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('like-count').innerText = data.total_likes;
+            this.innerText = data.liked ? 'Unlike' : 'Like';
+        });
+};
+
+const stars = document.querySelectorAll('.star');
+stars.forEach(star => {
+    star.onclick = function() {
+        const rating = this.getAttribute('data-rating');
+        fetch("{% url 'star_post' post.pk %}", {
+            method: 'POST',
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            body: new URLSearchParams({ 'rating': rating })
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('average-rating').innerText = data.average_rating.toFixed(1);
+        });
+    };
+});
+
+document.getElementById('applaud-button').onclick = function() {
+    fetch("{% url 'applaud_post' post.pk %}", { method: 'POST', headers: {'X-CSRFToken': '{{ csrf_token }}'} })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('applause-count').innerText = data.total_applauses;
+            this.innerText = data.applauded ? 'Undo Applaud' : '👏 Applaud';
+        });
+};
+</script>
+{% endblock %}

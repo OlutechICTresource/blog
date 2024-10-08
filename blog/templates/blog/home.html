@@ -1,0 +1,19 @@
+{% comment %} <!-- blog/templates/blog/home.html -->
+<h1>Welcome to Olutech ICT Resources Blog</h1>
+<p>Latest posts and updates.</p>
+<a href="{% url 'about' %}">About Us</a> | 
+<a href="{% url 'categories' %}">Blog Categories</a> | 
+<a href="{% url 'contact' %}">Contact Us</a> {% endcomment %}
+
+<!-- blog/templates/blog/home.html -->
+<h1>Welcome to Olutech ICT Resources Blog</h1>
+<a href="{% url 'create_post' %}">Create New Post</a>
+<ul>
+    {% for post in posts %}
+        <li>
+            <a href="{% url 'post_detail' post.pk %}">{{ post.title }}</a>
+            <p>By {{ post.author }} on {{ post.created_at }}</p>
+        </li>
+    {% endfor %}
+</ul>
+<a href="{% url 'about' %}">About Us</a>

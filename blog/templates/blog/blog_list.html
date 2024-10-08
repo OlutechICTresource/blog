@@ -1,0 +1,16 @@
+<!-- blog/templates/blog/blog_list.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Blog Posts</h2>
+  <ul>
+    {% for post in posts %}
+      <li>
+        <a href="{% url 'blog_detail' pk=post.pk %}">{{ post.title }}</a> by {{ post.author.username }}
+        <p>{{ post.content|truncatewords:30 }}</p>
+        <p>Tags: {% for tag in post.tags.all %}{{ tag.name }} {% endfor %}</p>
+      </li>
+    {% endfor %}
+  </ul>
+  <a href="{% url 'post_create' %}">Create new post</a>
+{% endblock %}
